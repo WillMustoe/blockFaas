@@ -11,15 +11,17 @@ package blockchain;
  */
 public class Bid extends BlockData{
 
+  
     @Override
-    public String toString() {
-        return "Bid{" + "auctionID=" + auctionID + ", bidAmount=" + bidAmount + '}';
-    }
+	public String toString() {
+		return "Bid [auctionID=" + auctionID + ", bidAmount=" + bidAmount + "]";
+	}
 
-    private final int auctionID;
+	private final int auctionID;
     private final double bidAmount;
     
-    public Bid(int auctionID, double bidAmount) {
+    public Bid(int auctionID, double bidAmount, String uuID) {
+    	super(uuID);
         this.auctionID = auctionID;
         this.bidAmount = bidAmount;
     }

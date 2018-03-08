@@ -14,7 +14,7 @@ public class BlockChainValidator {
     
     
         private static Boolean isValidNewBlock(blockchain.Block nextBlock, blockchain.Block previousBlock){
-        if(previousBlock.getIndex() != nextBlock.getIndex()){
+        if(previousBlock.getIndex() != nextBlock.getIndex()-1){
             logger.log(Level.WARNING, "Invalid Block Index:{0} : {1}", new Object[]{previousBlock.getIndex(), nextBlock.getIndex()});
             return false;
         }
@@ -30,7 +30,8 @@ public class BlockChainValidator {
     }
     
     public static Boolean isValidChain(List<Block> chain){
-        if(Hash.getHashFromBlock(chain.get(0)).equals(Hash.getHashFromBlock(BlockChain.getGenesisBlock()))){
+    	
+        if(!Hash.getHashFromBlock(chain.get(0)).equals(Hash.getHashFromBlock(BlockChain.getGenesisBlock()))){
             logger.log(Level.WARNING, "First Block Is Not Genesis");
             return false;
         }

@@ -6,8 +6,10 @@
 package blockchain;
 
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import com.google.gson.JsonSyntaxException;
 import com.google.gson.reflect.TypeToken;
+import com.google.gson.typeadapters.RuntimeTypeAdapterFactory;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -25,7 +27,7 @@ import java.util.logging.Logger;
  *
  * @author Will
  */
-class P2PServer implements Runnable {
+class P2PServer implements Runnable, BlockChainListener {
 
     private final BlockChain blockChain;
     private static final Logger logger = Logger.getLogger(P2PServer.class.getName());
@@ -34,9 +36,15 @@ class P2PServer implements Runnable {
     private final int socketServerPort;
     private final Gson gson;
 
-    P2PServer(BlockChain blockChain, HttpServerWrapper httpServer, int socketServerPort) {
-        gson = new Gson();
+    P2PServer(BlockChain blockChain, int socketServerPort) {
+    	
+    	final RuntimeTypeAdapterFactory<BlockData> typeFactory = RuntimeTypeAdapterFactory  
+    	        .of(BlockData.class, "type")
+    	        .registerSubtype(Bid.class, "bid");
+    	
+    	gson = new GsonBuilder().registerTypeAdapterFactory(typeFactory).create();
         this.blockChain = blockChain;
+        blockChain.registerBlockChainListener(this);
         peers = new ArrayList<>();
         this.socketServerPort = socketServerPort;
         
@@ -47,6 +55,7 @@ class P2PServer implements Runnable {
             Peer newPeer = new Peer(host, port);
             peers.add(newPeer);
             newPeer.sendMessage(new Message(Message.PEERS_QUERY_ALL, "", socketServerPort));
+            newPeer.sendMessage(new Message(Message.CHAIN_QUERY_LATEST, "", socketServerPort));
             return newPeer;
         } catch (IOException ex) {
             logger.log(Level.WARNING, "Peer not found: " + host + ":" + port, ex);
@@ -123,8 +132,10 @@ class P2PServer implements Runnable {
                 break;
             case Message.RESPONSE_CHAIN_LATEST :
             	parseChainLatest(message.getMessageData());
+            	break;
             case Message.RESPONSE_CHAIN_ALL :
             	parseChainAll(message.getMessageData());
+            	break;
                 
             default:
                 logger.log(Level.WARNING, "Unsupported message type recieved :{0}", message.toString());
@@ -133,7 +144,8 @@ class P2PServer implements Runnable {
         }  
     }
 
-    private void parseChainAll(String messageData) {
+
+	private void parseChainAll(String messageData) {
     	List<Block> newBlockChain;
         try {
            Type type = new TypeToken<List<Block>>() {}.getType();
@@ -152,7 +164,7 @@ class P2PServer implements Runnable {
 		
 		switch (resp) {
 		case BlockChain.BROADCAST_LATEST : 
-			 broadcast(new Message(Message.RESPONSE_CHAIN_LATEST, getLatestBlockJson(), socketServerPort));
+			 broadcastLatest();
 			break;
 		case BlockChain.QUERY_ALL :
 			broadcast(new Message(Message.CHAIN_QUERY_ALL, "", socketServerPort));
@@ -163,6 +175,10 @@ class P2PServer implements Runnable {
 			break;
 		}
 		
+	}
+
+	private void broadcastLatest() {
+		broadcast(new Message(Message.RESPONSE_CHAIN_LATEST, getLatestBlockJson(), socketServerPort));
 	}
 
 	private void parseChainLatest(String messageData) {
@@ -252,7 +268,7 @@ class P2PServer implements Runnable {
         peer.sendMessage(new Message(Message.RESPONSE_PEERS, peersJson, socketServerPort));
     }
     
-    private List<PeerData> getPeersData(){
+    public List<PeerData> getPeersData(){
         List<PeerData> peerDataList = new ArrayList<>();
         peers.forEach((peer) -> {
             peerDataList.add(peer.getPeerData());
@@ -264,7 +280,11 @@ class P2PServer implements Runnable {
         List<PeerData> peerDataList;
         try {
            Type type = new TypeToken<List<PeerData>>() {}.getType();
-            peerDataList = gson.fromJson(messageData, type); 
+            peerDataList = gson.fromJson(messageData, type);
+            if(peerDataList == null) {
+            	logger.log(Level.FINE, "Recived null peer list");
+            	return;
+            }
         } catch (JsonSyntaxException e) {
             logger.log(Level.WARNING, "Recived malformed peer list {0}", messageData);
             return;
@@ -281,4 +301,12 @@ class P2PServer implements Runnable {
         if(findPeer(peerData) == null) return false;
         return true;
     }
+
+	@Override
+	public void onBlockChainChange(int changeMode) {
+		if(changeMode == BlockChain.LOCAL_CHANGE) {
+			broadcastLatest();
+		}
+		
+	}
 }

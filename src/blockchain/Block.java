@@ -1,6 +1,5 @@
 package blockchain;
 
-import java.security.NoSuchAlgorithmException;
 import java.sql.Timestamp;
 
 /**

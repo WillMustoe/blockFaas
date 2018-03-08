@@ -9,6 +9,25 @@ package blockchain;
  *
  * @author Will
  */
-abstract public class BlockData {
+public class BlockData {
+	
+	private final String uuID;
+	
+	
+
+	public BlockData(String uuID) {
+		this.uuID = uuID;
+	}
+
+	public String getUUID() {
+		// TODO Auto-generated method stub
+		return uuID;
+	}
+
+	@Override
+	public String toString() {
+		return "BlockData [uuID=" + uuID + "]";
+	}
+	
     
 }

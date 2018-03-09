@@ -51,7 +51,6 @@ public class BlockChain {
     }
     
     public void addNewBlock(Bid data){
-    	System.out.println(data);
         Block previousBlock = getLatestBlock();
         int index = previousBlock.getIndex()+1;
         Timestamp timeStamp = new Timestamp(System.currentTimeMillis());
@@ -68,7 +67,6 @@ public class BlockChain {
 			if(oldLatest.getHash().equals(newLatest.getPreviousHash())) {
 				//Append block to chain
 				blockChain.add(newLatest);
-				System.out.println("New block appended");
 				notifyListeners(EXTERNAL_CHANGE);
 				return BROADCAST_LATEST;
 			}

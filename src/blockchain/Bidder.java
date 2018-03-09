@@ -16,14 +16,13 @@ public class Bidder implements BlockChainListener {
 		this.uniqueID = uniqueID;
 	}
 	
-	private void Bid(double bidAmount) {
-		blockChain.addNewBlock(new Bid(0, bidAmount, uniqueID));
+	private void Bid(double bidAmount, int auctionID) {
+		blockChain.addNewBlock(new Bid(auctionID, bidAmount, uniqueID));
 	}
 
 	@Override
 	public void onBlockChainChange(int changeMode) {
 		BlockData latestBlockData = blockChain.getLatestBlock().getData();
-		System.out.println(latestBlockData.toString());
 		if(latestBlockData.getUUID() == uniqueID) 
 			return;
 		if(isActive)
@@ -34,12 +33,12 @@ public class Bidder implements BlockChainListener {
 	private void evaluateNextBid(BlockData latestBlockData) {
 		if(latestBlockData instanceof Bid) {
 			double currentBid =((Bid) latestBlockData).getBidAmount();
+			int auctionID =((Bid) latestBlockData).getAuctionID();
 			if(currentBid >= maxBid) 
 				return;
 			else {
-				System.out.println("bidding: " +  uniqueID);
 				double bid = Math.random() *(maxBid - currentBid) + currentBid;
-				Bid(bid);
+				Bid(bid, auctionID);
 			}
 		}
 		else {

@@ -6,12 +6,12 @@ import java.util.List;
 public class NodeManager {
 	
 	public static List<Node> nodes;
-	public static Node genesisNode;
+	public static AuctioneerNode auctionNeerNode;
 	
 	public static void main(String[] args) {
 		System.out.println("Main");
 		nodes = new ArrayList<>();
-		genesisNode = new Node(4000, true);
+		auctionNeerNode = new AuctioneerNode(4000);
 		
 		for (int i = 0; i < 8; i++) {
 			Node newNode = new Node(4001 + i, false);

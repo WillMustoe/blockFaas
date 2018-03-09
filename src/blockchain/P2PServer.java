@@ -228,7 +228,8 @@ class P2PServer implements Runnable, BlockChainListener {
 
 	private void sendChain(Peer remotePeer) {
 		Type type = new TypeToken<List<Block>>() {}.getType();
-        String blocksJson = gson.toJson(blockChain.getBlockChain(), type);
+		List<Block> blockChainState = new ArrayList<>(blockChain.getBlockChain());
+        String blocksJson = gson.toJson(blockChainState, type);
         remotePeer.sendMessage(new Message(Message.RESPONSE_CHAIN_ALL, blocksJson, socketServerPort));
 	}
 

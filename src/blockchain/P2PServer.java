@@ -113,7 +113,7 @@ class P2PServer implements Runnable, BlockChainListener {
         try {
             message = Message.fromJson(messageJson);
         } catch (JsonSyntaxException e) {
-            logger.log(Level.WARNING, "JSON recived was not parseable into message{0}", messageJson);
+            logger.log(Level.INFO, "JSON recived was not parseable into message{0}", messageJson);
             return;
         }
         String returnAddress = s.getInetAddress().getHostAddress();

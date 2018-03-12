@@ -7,7 +7,7 @@ public class Bidder implements BlockChainListener {
 	
 	private final BlockChain blockChain;
 	private final String uniqueID;
-	private final double maxBid = 5.0f;
+	private final double maxBid = Math.random() *10f;
 	private final Logger logger = Logger.getLogger(this.getClass().getName());
 	private boolean isActive = false;
 

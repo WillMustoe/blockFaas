@@ -1,11 +1,14 @@
 package blockchain;
 
+import java.io.DataOutputStream;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.net.ConnectException;
 import java.net.Socket;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.zip.GZIPOutputStream;
 
 /**
  *
@@ -41,14 +44,17 @@ public final class Peer {
 		throw new java.net.ConnectException("Peer not found: " + host + ":" + port);
 	}
 
-	public void sendMessage(Message data) {
-		PrintWriter pw;
+	public synchronized void sendMessage(Message data) {
 		try {
-			pw = new PrintWriter(socket.getOutputStream());
-			pw.print(data.toJson() + "\n");
-			pw.flush();
-		} catch (IOException ex) {
-			Logger.getLogger(Peer.class.getName()).log(Level.SEVERE, null, ex);
+			OutputStream os = socket.getOutputStream();
+			DataOutputStream dos = new DataOutputStream(os);
+			byte[] buff = data.toJson().getBytes("UTF-8");
+		    dos.writeInt(buff.length);
+		    dos.write(buff);
+		    dos.flush();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		}
 	}
 }

@@ -34,7 +34,7 @@ public class Auctioneer implements Runnable {
 				winningBids.add(winningBid);
 				marketGraph.addValue(winningBid.getBidAmount());
 				currentAuction = winningBid.getAuctionID() + 1;
-				blockChain.addNewBlock(new Bid(currentAuction, 0, uniqueID));
+				blockChain.addNewBlock(new Bid(currentAuction, 0.0f, uniqueID));
 			}
 			try {
 				Thread.sleep(1000);

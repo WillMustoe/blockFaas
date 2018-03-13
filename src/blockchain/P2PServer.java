@@ -12,6 +12,7 @@ import com.google.gson.reflect.TypeToken;
 import com.google.gson.typeadapters.RuntimeTypeAdapterFactory;
 
 import java.io.BufferedReader;
+import java.io.DataInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -22,6 +23,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.zip.GZIPInputStream;
 
 /**
  *
@@ -93,9 +95,13 @@ class P2PServer implements Runnable, BlockChainListener {
             public void run() {
                 while (s.isConnected()) {
                     try {
-                        if (br.ready()) {
-                            br.lines().forEach(l -> handleMessage(l, s));
-                        }
+                    	InputStream is = s.getInputStream();
+                    	DataInputStream dis = new DataInputStream(is);
+                    	int len = dis.readInt();
+                    	byte[] buff = new byte[len];
+                    	dis.readFully(buff);
+                    	String response = new String(buff, "UTF-8");
+                    	handleMessage(response, s);
                     } catch (IOException ex) {
                         return;
                     }
@@ -113,7 +119,7 @@ class P2PServer implements Runnable, BlockChainListener {
         try {
             message = Message.fromJson(messageJson);
         } catch (JsonSyntaxException e) {
-            logger.log(Level.INFO, "JSON recived was not parseable into message{0}", messageJson);
+            logger.log(Level.INFO, "JSON recived was not parseable into message: {0}", messageJson);
             return;
         }
         String returnAddress = s.getInetAddress().getHostAddress();

@@ -13,7 +13,7 @@ public class BlockChainValidator {
     private static final Logger logger = Logger.getLogger(BlockChainValidator.class.getName());
     
     
-        private static Boolean isValidNewBlock(blockchain.Block nextBlock, blockchain.Block previousBlock){
+        public static Boolean isValidNewBlock(blockchain.Block nextBlock, blockchain.Block previousBlock){
         if(previousBlock.getIndex() != nextBlock.getIndex()-1){
             logger.log(Level.WARNING, "Invalid Block Index:{0} : {1}", new Object[]{previousBlock.getIndex(), nextBlock.getIndex()});
             return false;
@@ -22,10 +22,13 @@ public class BlockChainValidator {
             logger.log(Level.WARNING, "Invalid Previous Block Hash:{0} : {1}", new Object[]{previousBlock.getIndex(), nextBlock.getIndex()});
             return false;
         }
-        else if(blockchain.Hash.getHashFromBlock(nextBlock).equals(nextBlock.getHash())){
+        /*
+        else if(!blockchain.Hash.getHashFromBlock(nextBlock).equals(nextBlock.getHash())){
+
             logger.log(Level.WARNING, "Invalid New Block Hash:{0} : {1}", new Object[]{previousBlock.getIndex(), nextBlock.getIndex()});
             return false;
         }
+        */
         return true;
     }
     
@@ -36,7 +39,7 @@ public class BlockChainValidator {
             return false;
         }
         
-        for (int i = 1; i < chain.size(); i++) {
+        for (int i = 2; i < chain.size(); i++) {
             if(!isValidNewBlock(chain.get(i), chain.get(i-1))){
                 return false;
             }

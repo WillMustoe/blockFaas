@@ -50,12 +50,15 @@ public class BlockChain {
         });
     }
     
-    public void addNewBlock(Bid data){
+    public synchronized void addNewBlock(Bid data){
         Block previousBlock = getLatestBlock();
         int index = previousBlock.getIndex()+1;
         Timestamp timeStamp = new Timestamp(System.currentTimeMillis());
-        blockChain.add(new Block(index, previousBlock.getHash(), timeStamp, data));
-        notifyListeners(LOCAL_CHANGE);
+        Block nextBlock = new Block(index, previousBlock.getHash(), timeStamp, data);
+        if(BlockChainValidator.isValidNewBlock(nextBlock, getLatestBlock())) {
+        	blockChain.add(nextBlock);
+            notifyListeners(LOCAL_CHANGE);
+        }
     }
 
 	public int handleChain(List<Block> newBlockChain) {

@@ -28,7 +28,7 @@ public class Block {
     }
 
     public final String toHashableString() {
-        return index + previousHash + timestamp + data;
+        return "" + index + previousHash + timestamp + data;
     }
 
     public BlockData getData() {

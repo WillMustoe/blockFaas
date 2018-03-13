@@ -22,7 +22,7 @@ public class AuctioneerNode{
 		
 		httpServer = new HttpServerWrapper(blockChain, p2pServer);
 		
-		auctioneer = new  Auctioneer(blockChain, uniqueID, 5000);
+		auctioneer = new  Auctioneer(blockChain, uniqueID, 3000);
 		auctioneerThread = new Thread(auctioneer);
 		auctioneerThread.start();
 		

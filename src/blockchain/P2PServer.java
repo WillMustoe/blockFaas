@@ -110,7 +110,7 @@ class P2PServer implements Runnable, BlockChainListener {
         }).start();
     }
     
-    private void broadcast(Message data){
+    private synchronized void  broadcast(Message data){
         peers.forEach(p -> p.sendMessage(data));
     }
     
@@ -183,7 +183,7 @@ class P2PServer implements Runnable, BlockChainListener {
 		
 	}
 
-	private void broadcastLatest() {
+	private synchronized void broadcastLatest() {
 		broadcast(new Message(Message.RESPONSE_CHAIN_LATEST, getLatestBlockJson(), socketServerPort));
 	}
 

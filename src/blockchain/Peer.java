@@ -6,6 +6,7 @@ import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.net.ConnectException;
 import java.net.Socket;
+import java.security.PublicKey;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.zip.GZIPOutputStream;
@@ -18,14 +19,12 @@ public final class Peer {
 
 	private final Socket socket;
 	private final PeerData peerData;
+	private PublicKey publicKey;
+	private String uuid;
 
 	public Peer(String host, int port) throws IOException, InterruptedException {
 		this.peerData = new PeerData(host, port);
 		socket = attemptConnection(host, port);
-	}
-
-	public PeerData getPeerData() {
-		return peerData;
 	}
 
 	public Socket attemptConnection(String host, int port) throws ConnectException {
@@ -53,8 +52,27 @@ public final class Peer {
 		    dos.write(buff);
 		    dos.flush();
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+	}
+
+	public PeerData getPeerData() {
+		return peerData;
+	}
+
+	public PublicKey getPublicKey() {
+		return publicKey;
+	}
+
+	public void setPublicKey(PublicKey publicKey) {
+		this.publicKey = publicKey;
+	}
+
+	public String getUuid() {
+		return uuid;
+	}
+
+	public void setUuid(String uuid) {
+		this.uuid = uuid;
 	}
 }

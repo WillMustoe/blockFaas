@@ -10,14 +10,14 @@ public class Block {
 
     private final int index;
     private final String previousHash;
-    private final Timestamp timestamp;
+    private final long timestamp;
     private final BlockData data;
     private final String hash;
 
     public Block(int index, String previousHash, Timestamp timestamp, BlockData data){
         this.index = index;
         this.previousHash = previousHash;
-        this.timestamp = timestamp;
+        this.timestamp = timestamp.getTime();
         this.data = data;
         this.hash = Hash.getHash(this.toHashableString());
     }
@@ -28,7 +28,7 @@ public class Block {
     }
 
     public final String toHashableString() {
-        return "" + index + previousHash + timestamp + data;
+        return index + previousHash + timestamp + data;
     }
 
     public BlockData getData() {
@@ -43,7 +43,7 @@ public class Block {
         return previousHash;
     }
 
-    public Timestamp getTimestamp() {
+    public long getTimestamp() {
         return timestamp;
     }
 

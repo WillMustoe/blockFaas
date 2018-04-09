@@ -5,10 +5,13 @@
  */
 package blockchain;
 
+import java.security.KeyPair;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.logging.Logger;
+import java.security.PublicKey;
 
 /**
  *
@@ -25,6 +28,8 @@ public class BlockChain {
 	
 	private List<Block> blockChain;
 	private List<BlockChainListener> listeners = new ArrayList<>();
+	private Map<String, PublicKey> publicKeys;
+	private KeyPair keyPair;
 	
     public BlockChain() {
         blockChain = new ArrayList<>();
@@ -110,6 +115,15 @@ public class BlockChain {
 	
 	private void notifyListeners(int changeMode) {
 		this.listeners.forEach(listener -> listener.onBlockChainChange(changeMode));
+	}
+
+	public void setKeyPair(KeyPair keyPair) {
+	this.keyPair = keyPair;
+		
+	}
+	
+	public void setPublicKeys(Map<String, PublicKey> publicKeys) {
+		this.publicKeys = publicKeys;
 	}
 
 }

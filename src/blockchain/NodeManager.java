@@ -13,7 +13,7 @@ public class NodeManager {
 		nodes = new ArrayList<>();
 		auctionNeerNode = new AuctioneerNode(4000);
 		
-		for (int i = 0; i < 8; i++) {
+		for (int i = 0; i < 2; i++) {
 			Node newNode = new Node(4001 + i, false);
 			nodes.add(newNode);
 			newNode.addPeer("127.0.0.1", 4000);

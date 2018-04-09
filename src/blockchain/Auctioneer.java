@@ -1,8 +1,5 @@
 package blockchain;
 
-import java.util.ArrayList;
-import java.util.List;
-
 public class Auctioneer implements Runnable {
 	private final BlockChain blockChain;
 	private final String uniqueID;
@@ -22,8 +19,7 @@ public class Auctioneer implements Runnable {
 		while (true) {
 			Block latestBlock = blockChain.getLatestBlock();
 			BlockData latestBlockData = latestBlock.getData();
-
-			if (System.currentTimeMillis() - latestBlock.getTimestamp().getTime() > timeOut
+			if (System.currentTimeMillis() - latestBlock.getTimestamp() > timeOut
 					&& latestBlockData instanceof Bid
 					&& !latestBlock.getHash().equals(BlockChain.getGenesisBlock().getHash())) {
 				Bid winningBid = (Bid) latestBlockData;
@@ -41,7 +37,7 @@ public class Auctioneer implements Runnable {
 				
 			}
 			try {
-				Thread.sleep(1000);
+				Thread.sleep(100);
 			} catch (InterruptedException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();

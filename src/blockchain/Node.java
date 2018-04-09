@@ -22,16 +22,17 @@ public class Node {
 
 	public Node(int port, boolean hasHttpServer) {
 		blockChain = new BlockChain();
+		uniqueID = UUID.randomUUID().toString();
 
 		System.out.println("Creating Node bound to : " + port);
-		p2pServer = new P2PServer(blockChain, port);
+		p2pServer = new P2PServer(blockChain, port, uniqueID);
 		p2pThread = new Thread(p2pServer);
 		p2pThread.start();
 
 		if (hasHttpServer)
 			httpServer = new HttpServerWrapper(blockChain, p2pServer);
 		
-		uniqueID = UUID.randomUUID().toString();
+		
 		bidder = new Bidder(blockChain, uniqueID);
 		blockChain.registerBlockChainListener(bidder);
 	}

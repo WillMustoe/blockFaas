@@ -1,8 +1,3 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package blockchain;
 
 import com.google.gson.Gson;
@@ -17,13 +12,23 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.lang.reflect.Type;
+import java.math.BigInteger;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.security.KeyFactory;
+import java.security.KeyPair;
+import java.security.KeyPairGenerator;
+import java.security.NoSuchAlgorithmException;
+import java.security.PublicKey;
+import java.security.interfaces.RSAPublicKey;
+import java.security.spec.InvalidKeySpecException;
+import java.security.spec.RSAPublicKeySpec;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import java.util.zip.GZIPInputStream;
 
 /**
  *
@@ -37,8 +42,10 @@ class P2PServer implements Runnable, BlockChainListener {
     private PeerData myPeerData;
     private final int socketServerPort;
     private final Gson gson;
+    private KeyPair keyPair;
+    private final String uniqueID;
 
-    P2PServer(BlockChain blockChain, int socketServerPort) {
+    P2PServer(BlockChain blockChain, int socketServerPort, String uniqueID) {
     	
     	final RuntimeTypeAdapterFactory<BlockData> typeFactory = RuntimeTypeAdapterFactory  
     	        .of(BlockData.class, "type")
@@ -49,8 +56,23 @@ class P2PServer implements Runnable, BlockChainListener {
         blockChain.registerBlockChainListener(this);
         peers = new ArrayList<>();
         this.socketServerPort = socketServerPort;
+        this.uniqueID = uniqueID;
+        generateKeyPair();
         
     }
+
+	private void generateKeyPair() {
+		KeyPairGenerator keyPairGenerator;
+		try {
+			keyPairGenerator = KeyPairGenerator.getInstance("RSA");
+			keyPair = keyPairGenerator.generateKeyPair();
+		} catch (NoSuchAlgorithmException e) {
+			logger.log(Level.SEVERE, "No Such Algorithm Execption in Key Generation");
+			System.exit(1);
+		}
+		
+		blockChain.setKeyPair(keyPair);
+	}
 
     public Peer addPeer(String host, int port) {
         try {
@@ -58,6 +80,8 @@ class P2PServer implements Runnable, BlockChainListener {
             peers.add(newPeer);
             newPeer.sendMessage(new Message(Message.PEERS_QUERY_ALL, "", socketServerPort));
             newPeer.sendMessage(new Message(Message.CHAIN_QUERY_LATEST, "", socketServerPort));
+            newPeer.sendMessage(new Message(Message.QUERY_PUBLICKEY, "", socketServerPort));
+            newPeer.sendMessage(new Message(Message.QUERY_UUID, "", socketServerPort));
             return newPeer;
         } catch (IOException ex) {
             logger.log(Level.WARNING, "Peer not found: " + host + ":" + port, ex);
@@ -142,6 +166,18 @@ class P2PServer implements Runnable, BlockChainListener {
             case Message.RESPONSE_CHAIN_ALL :
             	parseChainAll(message.getMessageData());
             	break;
+            case Message.QUERY_PUBLICKEY :
+            	sendPublicKey(returnAddress, returnPort);
+            	break;
+            case Message.RESPONSE_PUBLICKEY :
+            	updatePublicKey(returnAddress, returnPort, message.getMessageData());
+            	break;
+            case Message.QUERY_UUID :
+            	sendUUID(returnAddress, returnPort);
+            	break;
+            case Message.RESPONSE_UUID :
+            	updateUUID(returnAddress, returnPort, message.getMessageData());
+            	break;
                 
             default:
                 logger.log(Level.WARNING, "Unsupported message type recieved :{0}", message.toString());
@@ -150,6 +186,60 @@ class P2PServer implements Runnable, BlockChainListener {
         }  
     }
 
+
+	private void updateUUID(String remoteHost, int port, String messageData) {
+		Peer peer = findPeer(remoteHost, port);
+		peer.setUuid(messageData);
+		updatePublicKeys();
+	}
+
+	private void updatePublicKeys() {
+		Map<String, PublicKey> publicKeys = new HashMap<>();
+		peers.forEach(peer -> {
+			publicKeys.put(peer.getUuid(), peer.getPublicKey());
+		});
+		blockChain.setPublicKeys(publicKeys);
+	}
+
+	private void sendUUID(String remoteHost, int port) {
+		Peer peer = findPeer(remoteHost, port);
+        peer.sendMessage(new Message(Message.RESPONSE_UUID, uniqueID, socketServerPort));
+		
+	}
+
+	private void updatePublicKey(String remoteHost, int port, String messageData) {
+		Peer peer = findPeer(remoteHost, port);
+		PublicKey publicKey;
+		try {
+			publicKey = deserialisePublicKey(messageData);
+		} catch (InvalidKeySpecException | NoSuchAlgorithmException e) {
+			logger.log(Level.SEVERE, "Error in public key deserialisation");
+			return;
+		}
+		peer.setPublicKey(publicKey);
+		updatePublicKeys();
+	}
+
+
+	private void sendPublicKey(String remoteHost, int port) {
+		Peer peer = findPeer(remoteHost, port);
+        String publicKeySerialised = serialisePublicKey(keyPair.getPublic());
+        peer.sendMessage(new Message(Message.RESPONSE_PUBLICKEY, publicKeySerialised, socketServerPort));
+	}
+
+	private String serialisePublicKey(PublicKey publicKey) {
+		RSAPublicKey publicKeyRSA = (RSAPublicKey)publicKey;
+		return publicKeyRSA.getModulus().toString() + "|" +
+		publicKeyRSA.getPublicExponent().toString();
+	}
+	
+	private PublicKey deserialisePublicKey(String messageData) throws InvalidKeySpecException, NoSuchAlgorithmException {
+		String []Parts = messageData.split("\\|");
+		RSAPublicKeySpec Spec = new RSAPublicKeySpec(
+		        new BigInteger(Parts[0]),
+		        new BigInteger(Parts[1]));
+		return KeyFactory.getInstance("RSA").generatePublic(Spec);
+	}
 
 	private void parseChainAll(String messageData) {
     	List<Block> newBlockChain;
@@ -160,9 +250,7 @@ class P2PServer implements Runnable, BlockChainListener {
             logger.log(Level.WARNING, "Recived malformed blockchain {0}", messageData);
             return;
         }
-        
         handleBlockChainResponse(newBlockChain);
-		
 	}
 
 	private void handleBlockChainResponse(List<Block> newBlockChain) {
@@ -207,7 +295,6 @@ class P2PServer implements Runnable, BlockChainListener {
             logger.log(Level.WARNING, "Recieved chainQueryLATEST from {0} : {1} could not find host", new Object[]{returnAddress, returnPort});
         }
     	sendLatest(remotePeer);
-		
 	}
 
 	private void sendLatest(Peer remotePeer) {
@@ -296,8 +383,7 @@ class P2PServer implements Runnable, BlockChainListener {
             logger.log(Level.WARNING, "Recived malformed peer list {0}", messageData);
             return;
         }
-        peerDataList.stream().filter(peer -> isValidNewPeer(peer)).forEachOrdered((peerData) -> {
-            System.out.println("Adding peer" + peerData.getHost() + " : " + peerData.getPort());
+        peerDataList.stream().filter(peer -> isValidNewPeer(peer)).forEach((peerData) -> {
             addPeer(peerData.getHost(), peerData.getPort());
         });
         
@@ -305,7 +391,7 @@ class P2PServer implements Runnable, BlockChainListener {
     
     private boolean isValidNewPeer(PeerData peerData){
         if(peerData.equals(myPeerData)) return false;
-        if(findPeer(peerData) == null) return false;
+        if(findPeer(peerData) != null) return false;
         return true;
     }
 

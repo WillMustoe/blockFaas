@@ -22,13 +22,11 @@ public class BlockChainValidator {
             logger.log(Level.WARNING, "Invalid Previous Block Hash:{0} : {1}", new Object[]{previousBlock.getIndex(), nextBlock.getIndex()});
             return false;
         }
-        /*
         else if(!blockchain.Hash.getHashFromBlock(nextBlock).equals(nextBlock.getHash())){
-
-            logger.log(Level.WARNING, "Invalid New Block Hash:{0} : {1}", new Object[]{previousBlock.getIndex(), nextBlock.getIndex()});
+            logger.log(Level.WARNING, nextBlock.getIndex() + " : " + blockchain.Hash.getHashFromBlock(nextBlock) + " : " +  nextBlock.getHash());
             return false;
         }
-        */
+        
         return true;
     }
     

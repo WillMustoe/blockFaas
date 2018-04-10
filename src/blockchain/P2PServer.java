@@ -362,7 +362,7 @@ class P2PServer implements Runnable, BlockChainListener {
         peer.sendMessage(new Message(Message.RESPONSE_PEERS, peersJson, socketServerPort));
     }
     
-    public List<PeerData> getPeersData(){
+    public  synchronized List<PeerData> getPeersData(){
         List<PeerData> peerDataList = new ArrayList<>();
         peers.forEach((peer) -> {
             peerDataList.add(peer.getPeerData());

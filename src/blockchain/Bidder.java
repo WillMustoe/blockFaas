@@ -21,7 +21,7 @@ public class Bidder implements BlockChainListener {
 	}
 	
 	private void Bid(double bidAmount, int auctionID) {
-		blockChain.addNewBlock(new Bid(auctionID, bidAmount, uniqueID));
+		blockChain.addNewBlock(new Bid(auctionID, bidAmount, uniqueID, blockChain.getKeyPair()));
 	}
 
 	@Override

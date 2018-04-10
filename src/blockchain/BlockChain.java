@@ -94,7 +94,7 @@ public class BlockChain {
 	}
 
 	private int replaceChain(List<Block> newBlockChain) {
-		if(BlockChainValidator.isValidChain(newBlockChain)) {
+		if(BlockChainValidator.isValidChain(newBlockChain, publicKeys)) {
 			//Replace current chain
 			blockChain = newBlockChain;
 			notifyListeners(EXTERNAL_CHANGE);
@@ -119,7 +119,10 @@ public class BlockChain {
 
 	public void setKeyPair(KeyPair keyPair) {
 	this.keyPair = keyPair;
-		
+	}
+	
+	public KeyPair getKeyPair() {
+		return this.keyPair;
 	}
 	
 	public void setPublicKeys(Map<String, PublicKey> publicKeys) {

@@ -39,50 +39,17 @@ public class BlockChainValidator {
 	public static Boolean isValidChain(List<Block> chain, Map<String, PublicKey> publicKeys) {
 
 		if (!Hash.getHashFromBlock(chain.get(0)).equals(Hash.getHashFromBlock(BlockChain.getGenesisBlock()))) {
+			System.out.println(chain.get(0) + " : " + BlockChain.getGenesisBlock());
 			logger.log(Level.WARNING, "First Block Is Not Genesis");
 			return false;
 		}
 
 		for (int i = 2; i < chain.size(); i++) {
-			if (!isValidNewBlock(chain.get(i), chain.get(i - 1)) || isValidBid(chain.get(i).getData(), publicKeys)) {
+			if (!isValidNewBlock(chain.get(i), chain.get(i - 1)) || StateValidator.isValidState(chain.get(i).getData(), publicKeys)) {
 				return false;
 			}
 		}
 		return true;
-	}
-
-	private static boolean isValidBid(BlockData data, Map<String, PublicKey> publicKeys) {
-		System.out.println(data.toString());
-		if(!(data instanceof Bid)) {
-			logger.log(Level.WARNING, "Unrecognised block data type");
-			return false;
-		}
-		Bid bid = (Bid) data;
-		System.out.println(bid.getUUID());
-		System.out.println(bid.getSignature());
-		Signature signature;
-		PublicKey publicKey = publicKeys.get(bid.getUUID());
-		if (publicKey == null) {
-			logger.log(Level.WARNING, "Public Key not found");
-			return false;
-		}
-		if (bid.getSignature() == null) {
-			logger.log(Level.WARNING, "Bid did not contain signature");
-			return false;
-		}
-		try {
-			signature = Signature.getInstance("SHA256WithRSA");
-			signature.initVerify(publicKey);
-			signature.update(bid.toString().getBytes());
-			return signature.verify(bid.getSignature());
-			} catch (NoSuchAlgorithmException e) {
-			e.printStackTrace();
-		} catch (InvalidKeyException e) {
-			e.printStackTrace();
-		} catch (SignatureException e) {
-			e.printStackTrace();
-		}
-		return false;
 	}
 
 }

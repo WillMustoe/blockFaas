@@ -1,8 +1,3 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package blockchain;
 
 import java.security.InvalidKeyException;
@@ -16,24 +11,14 @@ import java.security.SignatureException;
  *
  * @author Will
  */
-public class Bid extends BlockData {
+public class Bid {
 
-	private final int auctionID;
 	private final double bidAmount;
 	private final byte[] signature;
 
-	public Bid(int auctionID, double bidAmount, String uuID, KeyPair keyPair) {
-		super(uuID);
-		this.auctionID = auctionID;
+	public Bid(double bidAmount, KeyPair keyPair) {
 		this.bidAmount = bidAmount;
 		this.signature = sign(keyPair);
-	}
-	
-	public Bid(int auctionID, double bidAmount, String uuID) {
-		super(uuID);
-		this.auctionID = auctionID;
-		this.bidAmount = bidAmount;
-		this.signature = null;
 	}
 
 	private byte[] sign(KeyPair keyPair) {
@@ -41,7 +26,7 @@ public class Bid extends BlockData {
 			Signature signature = Signature.getInstance("SHA256WithRSA");
 			SecureRandom secureRandom = new SecureRandom();
 			signature.initSign(keyPair.getPrivate(), secureRandom);
-			signature.update(this.toString().getBytes());
+			signature.update(this.toSignatureString().getBytes());
 			return signature.sign();
 		} catch (NoSuchAlgorithmException e) {
 			e.printStackTrace();
@@ -53,9 +38,6 @@ public class Bid extends BlockData {
 		return null;
 	}
 
-	public int getAuctionID() {
-		return auctionID;
-	}
 
 	public double getBidAmount() {
 		return bidAmount;
@@ -65,8 +47,12 @@ public class Bid extends BlockData {
 		return signature;
 	}
 
+	public String toSignatureString() {
+		return "Bid [bidAmount=" + bidAmount + "]";
+	}
+
 	@Override
 	public String toString() {
-		return "Bid [auctionID=" + auctionID + ", bidAmount=" + bidAmount + "]";
+		return "Bid [bidAmount=" + bidAmount + "]";
 	}
 }

@@ -49,7 +49,7 @@ class P2PServer implements Runnable, BlockChainListener {
     	
     	final RuntimeTypeAdapterFactory<BlockData> typeFactory = RuntimeTypeAdapterFactory  
     	        .of(BlockData.class, "type")
-    	        .registerSubtype(Bid.class, "bid");
+    	        .registerSubtype(State.class, "state");
     	
     	gson = new GsonBuilder().registerTypeAdapterFactory(typeFactory).create();
         this.blockChain = blockChain;

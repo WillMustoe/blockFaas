@@ -42,7 +42,7 @@ public class BlockChain {
     }
 
     public static Block getGenesisBlock() {
-        return new Block(0, "", new Timestamp(0), new Bid(0, 0, null));
+        return new Block(0, "", new Timestamp(0), new State());
     }
     
     public Block getLatestBlock() {
@@ -55,7 +55,7 @@ public class BlockChain {
         });
     }
     
-    public synchronized void addNewBlock(Bid data){
+    public synchronized void addNewBlock(State data){
         Block previousBlock = getLatestBlock();
         int index = previousBlock.getIndex()+1;
         Timestamp timeStamp = new Timestamp(System.currentTimeMillis());

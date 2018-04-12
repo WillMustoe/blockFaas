@@ -1,16 +1,17 @@
 package blockchain;
 
 import java.util.Calendar;
+import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.apache.commons.math3.analysis.function.Gaussian;
 
 public class Bidder implements BlockChainListener {
-	
+
 	private final BlockChain blockChain;
 	private final String uniqueID;
-	private double maxBid = Math.random()*10 + 1.0f;
+	private double maxBid = Math.random() * 10 + 1.0f;
 	private final Logger logger = Logger.getLogger(this.getClass().getName());
 	private boolean isActive = false;
 	private boolean isNormal = Math.random() > 0.5;
@@ -19,51 +20,49 @@ public class Bidder implements BlockChainListener {
 		this.blockChain = blockChain;
 		this.uniqueID = uniqueID;
 	}
-	
-	private void Bid(double bidAmount, int auctionID) {
-		blockChain.addNewBlock(new Bid(auctionID, bidAmount, uniqueID, blockChain.getKeyPair()));
+
+	private void pushState(State state) {
+		blockChain.addNewBlock(state);
 	}
 
 	@Override
 	public void onBlockChainChange(int changeMode) {
 		BlockData latestBlockData = blockChain.getLatestBlock().getData();
-		if(latestBlockData.getUUID() == uniqueID) 
-			return;
-		if(isActive)
-			evaluateNextBid(latestBlockData);
-		
+		if (isActive)
+			evaluateState(latestBlockData);
+
 	}
 
-	private void evaluateNextBid(BlockData latestBlockData) {
+	private void evaluateState(BlockData latestBlockData) {
 		setMaxBid();
-		if(latestBlockData instanceof Bid) {
-			double currentBid =((Bid) latestBlockData).getBidAmount();
-			int auctionID =((Bid) latestBlockData).getAuctionID();
-			if(currentBid >= maxBid) 
-				return;
-			else {
-				double bid = Math.random()/10 + currentBid;
-				Bid(bid, auctionID);
-			}
-		}
-		else {
+		if (!(latestBlockData instanceof State)) {
 			logger.log(Level.WARNING, "Unrecognised blockdata type : " + latestBlockData.toString());
+			return;
 		}
-		
+		State state = (State) latestBlockData;
+		State newState = new State(state);
+		newState.updateConsumerBid(uniqueID, getNextBid());
+		pushState(newState);
+
+	}
+
+	private Bid getNextBid() {
+		return new Bid(maxBid, blockChain.getKeyPair());
 	}
 
 	private void setMaxBid() {
-		if(!isNormal) return;
-		else this.maxBid = getNormalMax();
-		
+		if (!isNormal)
+			return;
+		else
+			this.maxBid = getNormalMax();
+
 	}
 
 	private double getNormalMax() {
 		Gaussian gauss = new Gaussian(30, 30);
 		Calendar calendar = Calendar.getInstance();
 		float timeInMinutes = calendar.get(Calendar.MINUTE) + calendar.get(Calendar.SECOND) / (float) 60;
-		return gauss.value(timeInMinutes)*600 + Math.random();
-		
+		return gauss.value(timeInMinutes) * 600 + Math.random();
 	}
 
 	public boolean isActive() {
@@ -71,7 +70,7 @@ public class Bidder implements BlockChainListener {
 	}
 
 	public void setActive(boolean isActive) {
-		evaluateNextBid(blockChain.getLatestBlock().getData());
+		evaluateState(blockChain.getLatestBlock().getData());
 		this.isActive = isActive;
 	}
 

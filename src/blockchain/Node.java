@@ -13,28 +13,32 @@ import java.util.UUID;
  */
 public class Node {
 
-	private final BlockChain blockChain;
+	private final BlockChain blockchain;
 	private HttpServerWrapper httpServer = null;
 	private final P2PServer p2pServer;
 	private final Thread p2pThread;
 	private final String uniqueID;
 	private final Bidder bidder;
+	private final Output output;
 
 	public Node(int port, boolean hasHttpServer) {
-		blockChain = new BlockChain();
+		blockchain = new BlockChain();
 		uniqueID = UUID.randomUUID().toString();
 
 		System.out.println("Creating Node bound to : " + port);
-		p2pServer = new P2PServer(blockChain, port, uniqueID);
+		p2pServer = new P2PServer(blockchain, port, uniqueID);
 		p2pThread = new Thread(p2pServer);
 		p2pThread.start();
 
 		if (hasHttpServer)
-			httpServer = new HttpServerWrapper(blockChain, p2pServer);
+			httpServer = new HttpServerWrapper(blockchain, p2pServer);
 		
 		
-		bidder = new Bidder(blockChain, uniqueID);
-		blockChain.registerBlockChainListener(bidder);
+		bidder = new Bidder(blockchain, uniqueID);
+		blockchain.registerBlockChainListener(bidder);
+		
+		output = new Output(blockchain);
+		blockchain.registerBlockChainListener(output);
 	}
 
 	public void addPeer(String remoteHost, int remotePort) {

@@ -15,6 +15,7 @@ public class Bidder implements BlockChainListener {
 	private final Logger logger = Logger.getLogger(this.getClass().getName());
 	private boolean isActive = false;
 	private boolean isNormal = Math.random() > 0.5;
+	private boolean isConsumer = Math.random() > 0.5;
 
 	public Bidder(BlockChain blockChain, String uniqueID) {
 		this.blockChain = blockChain;
@@ -41,7 +42,10 @@ public class Bidder implements BlockChainListener {
 		}
 		State state = (State) latestBlockData;
 		State newState = new State(state);
+		if(isConsumer)
 		newState.updateConsumerBid(uniqueID, getNextBid());
+		else
+			newState.updateSupplierBid(uniqueID, getNextBid());
 		pushState(newState);
 
 	}

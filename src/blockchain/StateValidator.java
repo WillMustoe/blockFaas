@@ -41,7 +41,7 @@ public class StateValidator {
 	private static boolean isValidBid(Map<String, PublicKey> publicKeys, String uuid, Bid bid) {
 		PublicKey publicKey = publicKeys.get(uuid);
 		if (publicKey == null) {
-			logger.log(Level.WARNING, "Public Key not found");
+			logger.log(Level.WARNING, "Public Key not found: " + uuid + " : " + publicKeys.keySet().toString());
 			return false;
 		}
 		if (bid.getSignature() == null) {

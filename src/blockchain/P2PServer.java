@@ -60,6 +60,10 @@ class P2PServer implements Runnable, BlockChainListener {
         generateKeyPair();
         
     }
+    
+    private synchronized List<Peer> getPeers(){
+    	return peers;
+    }
 
 	private void generateKeyPair() {
 		KeyPairGenerator keyPairGenerator;
@@ -135,7 +139,7 @@ class P2PServer implements Runnable, BlockChainListener {
     }
     
     private synchronized void  broadcast(Message data){
-        peers.forEach(p -> p.sendMessage(data));
+        getPeers().forEach(p -> p.sendMessage(data));
     }
     
     private void handleMessage(String messageJson, Socket s){
@@ -195,7 +199,7 @@ class P2PServer implements Runnable, BlockChainListener {
 
 	private void updatePublicKeys() {
 		Map<String, PublicKey> publicKeys = new HashMap<>();
-		peers.forEach(peer -> {
+		getPeers().forEach(peer -> {
 			publicKeys.put(peer.getUuid(), peer.getPublicKey());
 		});
 		blockChain.setPublicKeys(publicKeys);
@@ -364,7 +368,7 @@ class P2PServer implements Runnable, BlockChainListener {
     
     public  synchronized List<PeerData> getPeersData(){
         List<PeerData> peerDataList = new ArrayList<>();
-        peers.forEach((peer) -> {
+        getPeers().forEach((peer) -> {
             peerDataList.add(peer.getPeerData());
         });
         return peerDataList;

@@ -41,6 +41,8 @@ class HttpServerWrapper {
             System.out.println("Http server started on: " + port);
             server.createContext("/blocks", new BlockHandler());
             server.createContext("/peers", new PeerHandler());
+            server.createContext("/blockchain", new BlocklchainHandler());
+            server.createContext("/bids", new BidsHandler());
             server.setExecutor(null);
             server.start();
             return server;
@@ -71,6 +73,32 @@ class HttpServerWrapper {
             Gson gson = new Gson();
             Type type = new TypeToken<List<PeerData>>() {}.getType();
             String response = gson.toJson(p2pServer.getPeersData(), type);
+            he.sendResponseHeaders(200, response.length());
+            OutputStream os = he.getResponseBody();
+            os.write(response.getBytes());
+            os.close();
+        }
+    }
+    
+    private static class BlocklchainHandler implements HttpHandler {
+
+        @Override
+        public void handle(HttpExchange he) throws IOException {
+            Gson gson = new Gson();
+            String response = gson.toJson(blockChain.getBlockChain().size());
+            he.sendResponseHeaders(200, response.length());
+            OutputStream os = he.getResponseBody();
+            os.write(response.getBytes());
+            os.close();
+        }
+    }
+    
+    private static class BidsHandler implements HttpHandler {
+
+        @Override
+        public void handle(HttpExchange he) throws IOException {
+            Gson gson = new Gson();
+            String response = gson.toJson(blockChain.getLatestBlock().getData().toString());
             he.sendResponseHeaders(200, response.length());
             OutputStream os = he.getResponseBody();
             os.write(response.getBytes());

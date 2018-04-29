@@ -45,7 +45,12 @@ public class BlockChainValidator {
 		}
 
 		for (int i = 2; i < chain.size(); i++) {
-			if (!isValidNewBlock(chain.get(i), chain.get(i - 1)) || StateValidator.isValidState(chain.get(i).getData(), publicKeys)) {
+			if (!isValidNewBlock(chain.get(i), chain.get(i - 1))) {
+				logger.log(Level.WARNING, "Invalid Block");
+				return false;
+			}
+			else if (!StateValidator.isValidState(chain.get(i).getData(), publicKeys)) {
+				logger.log(Level.WARNING, "Invalid State");
 				return false;
 			}
 		}

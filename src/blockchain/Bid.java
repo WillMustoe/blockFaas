@@ -48,11 +48,11 @@ public class Bid {
 	}
 
 	public String toSignatureString() {
-		return "Bid [bidAmount=" + bidAmount + "]";
+		return "Bid [bidAmount:" + bidAmount + "]";
 	}
 
 	@Override
 	public String toString() {
-		return "Bid [bidAmount=" + bidAmount + "]";
+		return "Bid [bidAmount:" + bidAmount + "]";
 	}
 }

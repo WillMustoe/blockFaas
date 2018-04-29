@@ -35,7 +35,7 @@ public class State extends BlockData {
 
 	@Override
 	public String toString() {
-		return "State [supplierBids=" + supplierBids + ", consumerBids=" + consumerBids + "]";
+		return "State [supplierBids:" + supplierBids + ", consumerBids:" + consumerBids + "]";
 	}
 	
 	

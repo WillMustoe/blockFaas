@@ -5,6 +5,7 @@
  */
 package blockchain;
 
+import java.util.Timer;
 import java.util.UUID;
 
 /**
@@ -19,7 +20,7 @@ public class Node {
 	private final Thread p2pThread;
 	private final String uniqueID;
 	private final Bidder bidder;
-	private final Output output;
+	private  Output output;
 
 	public Node(int port, boolean hasHttpServer) {
 		blockchain = new BlockChain();
@@ -30,22 +31,18 @@ public class Node {
 		p2pThread = new Thread(p2pServer);
 		p2pThread.start();
 
-		if (hasHttpServer)
+		if (hasHttpServer) {
+			output = new Output(blockchain);
+			blockchain.registerBlockChainListener(output);
 			httpServer = new HttpServerWrapper(blockchain, p2pServer);
-		
-		
-		bidder = new Bidder(blockchain, uniqueID);
-		blockchain.registerBlockChainListener(bidder);
-		
-		output = new Output(blockchain);
-		blockchain.registerBlockChainListener(output);
+		}
+			
+		bidder = new Bidder(blockchain, uniqueID, port%2 == 0 );
+		Timer timer = new Timer();
+		timer.schedule(bidder, 0, 5000);
 	}
 
 	public void addPeer(String remoteHost, int remotePort) {
 		p2pServer.addPeer(remoteHost, remotePort);
-	}
-	
-	public void startBidding() {
-		bidder.setActive(true);
 	}
 }

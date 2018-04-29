@@ -48,7 +48,14 @@ public class StateValidator {
 			logger.log(Level.WARNING, "Bid did not contain signature");
 			return false;
 		}
-		return isValidSignature(publicKey, bid.toString(), bid.getSignature());
+		if(isValidSignature(publicKey, bid.toString(), bid.getSignature())) {
+			return true;
+		}
+		else {
+			logger.log(Level.WARNING, "Signature not valid");
+			return false;
+		}
+		
 	}
 
 	private static boolean isValidSignature(PublicKey publicKey, String data, byte[] sig) {
@@ -57,12 +64,16 @@ public class StateValidator {
 			signature = Signature.getInstance("SHA256WithRSA");
 			signature.initVerify(publicKey);
 			signature.update(data.getBytes());
-			return signature.verify(sig);
+			if( !signature.verify(sig)) {
+				logger.log(Level.WARNING, "Invalid Signature");
+				return false;
+			}
+			else return true;
 		} catch (InvalidKeyException | NoSuchAlgorithmException | SignatureException e) {
 			logger.log(Level.SEVERE, "Error in State Signature Checking");
 			e.printStackTrace();
+			return false;
 		}
-		return false;
 	}
 
 }

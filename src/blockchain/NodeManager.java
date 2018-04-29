@@ -14,19 +14,10 @@ public class NodeManager {
 		genesisNode = new Node(4000, true);
 		nodes.add(genesisNode);
 		
-		for (int i = 0; i < 2; i++) {
+		for (int i = 0; i < 4; i++) {
 			Node newNode = new Node(4001 + i, false);
 			nodes.add(newNode);
 			newNode.addPeer("127.0.0.1", 4000);
-		}
-		for (int i = 0; i < nodes.size(); i++) {
-			try {
-				Thread.sleep(500);
-			} catch (InterruptedException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-			nodes.get(i).startBidding();
 		}
 	}
 

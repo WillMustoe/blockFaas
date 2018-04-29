@@ -20,10 +20,8 @@ public class Message {
     public static final int RESPONSE_PEERS = 3;
     public static final int RESPONSE_CHAIN_ALL = 4;
     public static final int RESPONSE_CHAIN_LATEST = 5;
-	public static final int QUERY_PUBLICKEY = 6;
-	public static final int RESPONSE_PUBLICKEY = 7;
-	public static final int QUERY_UUID = 8;
-	public static final int RESPONSE_UUID = 9;
+	public static final int QUERY_IDENTITY = 6;
+	public static final int RESPONSE_IDENTITY = 7;
 
     static Message fromJson(String json) throws JsonSyntaxException{
         Gson gson = new Gson();

@@ -6,12 +6,13 @@ import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.security.Signature;
 import java.security.SignatureException;
+import java.util.Comparator;
 
 /**
  *
  * @author Will
  */
-public class Bid {
+public class Bid{
 
 	private final double bidAmount;
 	private final byte[] signature;

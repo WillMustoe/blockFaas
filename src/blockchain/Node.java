@@ -23,8 +23,9 @@ public class Node {
 	private  Output output;
 
 	public Node(int port, boolean hasHttpServer) {
-		blockchain = new BlockChain();
+		
 		uniqueID = UUID.randomUUID().toString();
+		blockchain = new BlockChain(uniqueID);
 
 		System.out.println("Creating Node bound to : " + port);
 		p2pServer = new P2PServer(blockchain, port, uniqueID);
@@ -39,7 +40,7 @@ public class Node {
 			
 		bidder = new Bidder(blockchain, uniqueID, port%2 == 0 );
 		Timer timer = new Timer();
-		timer.schedule(bidder, 0, 5000);
+		timer.schedule(bidder, 5000, 1000);
 	}
 
 	public void addPeer(String remoteHost, int remotePort) {

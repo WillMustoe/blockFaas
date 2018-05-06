@@ -29,12 +29,15 @@ public class BlockChain {
 	private List<Block> blockChain;
 	private List<BlockChainListener> listeners = new ArrayList<>();
 	private Map<String, PublicKey> publicKeys;
+
+
 	private KeyPair keyPair;
+	private final String uuid;
 	
-    public BlockChain() {
+    public BlockChain(String uuid) {
         blockChain = new ArrayList<>();
         blockChain.add(getGenesisBlock());
-        Logger.getLogger(this.getClass().getName());
+        this.uuid = uuid;
     }
 
     public List<Block> getBlockChain() {
@@ -60,10 +63,11 @@ public class BlockChain {
         int index = previousBlock.getIndex()+1;
         Timestamp timeStamp = new Timestamp(System.currentTimeMillis());
         Block nextBlock = new Block(index, previousBlock.getHash(), timeStamp, data);
-        if(BlockChainValidator.isValidNewBlock(nextBlock, getLatestBlock())) {
+        if(BlockChainValidator.isValidNextBlock(nextBlock, getLatestBlock())) {
         	blockChain.add(nextBlock);
             notifyListeners(LOCAL_CHANGE);
         }
+        BlockChainValidator.isValidChain(blockChain, publicKeys);
     }
 
 	public int handleChain(List<Block> newBlockChain) {
@@ -128,5 +132,10 @@ public class BlockChain {
 	public void setPublicKeys(Map<String, PublicKey> publicKeys) {
 		this.publicKeys = publicKeys;
 	}
+	
+	public Map<String, PublicKey> getPublicKeys() {
+		return publicKeys;
+	}
+	
 
 }

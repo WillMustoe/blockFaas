@@ -41,18 +41,18 @@ public class StateValidator {
 	private static boolean isValidBid(Map<String, PublicKey> publicKeys, String uuid, Bid bid) {
 		PublicKey publicKey = publicKeys.get(uuid);
 		if (publicKey == null) {
-			logger.log(Level.WARNING, "Public Key not found: " + uuid + " : " + publicKeys.keySet().toString());
+			logger.log(Level.FINE, "Public Key not found: " + uuid + " : " + publicKeys.keySet().toString());
 			return false;
 		}
 		if (bid.getSignature() == null) {
-			logger.log(Level.WARNING, "Bid did not contain signature");
+			logger.log(Level.FINE, "Bid did not contain signature");
 			return false;
 		}
 		if(isValidSignature(publicKey, bid.toString(), bid.getSignature())) {
 			return true;
 		}
 		else {
-			logger.log(Level.WARNING, "Signature not valid");
+			logger.log(Level.FINE, "Signature not valid");
 			return false;
 		}
 		
@@ -65,7 +65,7 @@ public class StateValidator {
 			signature.initVerify(publicKey);
 			signature.update(data.getBytes());
 			if( !signature.verify(sig)) {
-				logger.log(Level.WARNING, "Invalid Signature");
+				logger.log(Level.FINE, "Invalid Signature");
 				return false;
 			}
 			else return true;

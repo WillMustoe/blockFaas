@@ -7,7 +7,7 @@ public class Output implements BlockChainListener{
 
 	public Output(BlockChain blockchain) {
 		this. blockchain = blockchain;
-		this.marketGraph = new MarketGraph("Market Value", "Price Vs Time of Day");
+		this.marketGraph = new MarketGraph("Market Value", "Market Value");
 		marketGraph.display();
 	}
 
@@ -21,6 +21,7 @@ public class Output implements BlockChainListener{
 		 State state = (State) data;
 		 double currentPrice = Auctioneer.calculatePrice(state);
 		 marketGraph.addValue(currentPrice);
+		 marketGraph.writeOut();
 	}
 
 }
